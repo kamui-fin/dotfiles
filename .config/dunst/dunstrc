@@ -1,0 +1,68 @@
+[global]
+title = Dunst
+class = Dunst
+monitor = 0
+follow = none
+geometry = "300x6-30+60" # top right
+indicate_hidden = yes
+shrink = yes
+
+transparency = 0
+separator_height = 2
+padding = 8
+horizontal_padding = 13
+frame_width = 8
+frame_color = "#3b4252"
+separator_color = "#404859"
+
+font = Inconsolata Bold 10
+
+line_height = 0
+markup = full
+format = "<span size='x-large' font_desc='Inconsolata 11' weight='bold' foreground='#f9f9f9'>%s</span>\n\n<span size="large" font_desc='Iosevka'>%b</span>"
+alignment = center
+
+idle_threshold = 120
+show_age_threshold = 60
+sort = no
+word_wrap = yes
+ignore_newline = no
+stack_duplicates = false
+hide_duplicate_count = yes
+show_indicators = no
+sticky_history = no
+history_length = 10
+always_run_script = true
+corner_radius = 0
+icon_position = left
+max_icon_size = 70
+
+icon_path = /usr/share/icons/Tela/scalable/apps:/usr/share/icons/Tela/scalable/devices:/usr/share/icons/Tela/scalable/places:/usr/share/icons/Tela/scalable/mimetypes
+
+browser = firefox
+dmenu = rofi -dmenu
+
+mouse_left_click = close_current
+mouse_middle_click = do_action
+mouse_right_click = close_all
+
+[shortcuts]
+close = ctrl+space
+close_all = ctrl+shift+space
+history = ctrl+Escape
+context = ctrl+shift+period
+
+[urgency_low]
+timeout = 3
+background = "#3b4252"
+foreground = "#f9f9f9"
+
+[urgency_normal]
+timeout = 6
+background = "#3b4252"
+foreground = "#f9f9f9"
+
+[urgency_critical]
+timeout = 0
+background = "#3b4252"
+foreground = "#f9f9f9"

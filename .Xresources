@@ -1,0 +1,11 @@
+Xft.dpi: 93;
+Xft.autohint: 0
+Xft.lcdfilter: lcddefault
+Xft.hintstyle: hintfull
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: none
+
+Sxiv.background: #eceff4
+Sxiv.foreground: #434c5e
+Sxiv.font: JetBrains Mono-10;

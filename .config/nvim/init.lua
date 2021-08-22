@@ -1,7 +1,13 @@
-local install_path = vim.fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+local cmd = vim.cmd
+local fn = vim.fn
+local g = vim.g
+local opt = vim.opt
+local exec = vim.api.nvim_exec
 
-if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-    vim.fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
+local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+
+if fn.empty(fn.glob(install_path)) > 0 then
+    fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
     vim.api.nvim_command('packadd packer.nvim')
 end
 
@@ -72,179 +78,195 @@ require('packer').startup(function()
     }
 end)
 
-
 -- Colors
-vim.o.termguicolors = true
-vim.g.lightline = {
+opt.termguicolors = true
+g.lightline = {
     colorscheme = 'nord'
 }
 
-vim.o.shiftwidth = 4 -- # of spaces for autoindent
-vim.o.softtabstop = 4 -- Pretend tab is removed when hitting <BS>
-vim.o.expandtab = true -- Insert spaces when hitting <Tab> 
-vim.o.autoindent = true-- Same indent as previous line
+opt.shiftwidth = 4 -- # of spaces for autoindent
+opt.softtabstop = 4 -- Pretend tab is removed when hitting <BS>
+opt.expandtab = true -- Insert spaces when hitting <Tab>
+opt.autoindent = true-- Same indent as previous line
 
-vim.wo.number = true -- Also show the current line instead of a 0
-vim.wo.relativenumber = true -- Easier way to calculate lines
+opt.number = true -- Also show the current line instead of a 0
+opt.relativenumber = true -- Easier way to calculate lines
 
-vim.o.hlsearch = false -- Turn off persistant highlighting
-vim.o.ignorecase = true -- Ignore case when searching
-vim.o.smartcase = true -- If first letter is uppercase, then make the search Case sensitive
+opt.hlsearch = false -- Turn off persistant highlighting
+opt.ignorecase = true -- Ignore case when searching
+opt.smartcase = true -- If first letter is uppercase, then make the search Case sensitive
 
-vim.o.undofile = true -- Persistant backup file
-vim.o.undolevels = 1000 -- Use a large number of undo levels
-vim.o.undodir = '/home/kamui/.config/nvim/undodir' 
+opt.undofile = true -- Persistant backup file
+opt.undolevels = 1000 -- Use a large number of undo levels
+opt.undodir = '/home/kamui/.config/nvim/undodir'
 
 -- Misc
-vim.o.helplang = 'ja,en' --Japanese help docs
-vim.o.hidden = true -- Hide buffers instead of closing them
-vim.o.mouse = 'a' -- Be able to use the mouse
-vim.o.scrolloff = 8 -- So the cursor isn't all the way at the bottom
-vim.o.splitbelow = true -- Split directions
-vim.o.splitright = true 
-vim.o.guicursor = 'i:block' -- Get rid of the ugly line cursor in insert mode
-vim.o.wrap = true -- Wrap lines
-vim.o.history = 1000 -- Bigger history size
-vim.o.title = true -- Change title
-vim.o.lazyredraw = true -- Don't redraw when executing macros
-vim.o.showmode = false -- Since lightline already displays it
-vim.o.completeopt = 'menuone,noselect'
-vim.o.updatetime = 200 -- Inactive time for CursorHold
-vim.o.shortmess = vim.o.shortmess .. 'c'
+opt.helplang = 'ja,en' --Japanese help docs
+opt.hidden = true -- Hide buffers instead of closing them
+opt.mouse = 'a' -- Be able to use the mouse
+opt.scrolloff = 8 -- So the cursor isn't all the way at the bottom
+opt.splitbelow = true -- Split directions
+opt.splitright = true
+opt.guicursor = 'i:block' -- Get rid of the ugly line cursor in insert mode
+opt.wrap = false -- Wrap lines
+opt.history = 1000 -- Bigger history size
+opt.title = true -- Change title
+opt.lazyredraw = true -- Don't redraw when executing macros
+opt.showmode = false -- Since lightline already displays it
+opt.completeopt = 'menuone,noselect'
+opt.updatetime = 200 -- Inactive time for CursorHold
+opt.shortmess:append({c = true})
 
 -- Leader key
-vim.g.mapleader = ' '
+g.mapleader = ' '
+
+local map = function(key)
+    -- get the extra options
+    local opts = {noremap = true}
+    for i, v in pairs(key) do
+        if type(i) == 'string' then opts[i] = v end
+    end
+    vim.api.nvim_set_keymap(key[1], key[2], key[3], opts)
+end
 
 -- Alternate Esc bind
-vim.api.nvim_set_keymap("i", "<C-C>", "<Esc>", { silent = true })
+map {"i", "<C-C>", "<Esc>", { silent = true }}
 
 -- Edit vimrc
-vim.api.nvim_set_keymap('n', '<Leader>ev', ':new ~/.config/nvim/init.lua<CR>', { noremap = true, silent = true })
+map {'n', '<Leader>ev', ':new ~/.config/nvim/init.lua<CR>', { silent = true }}
 
 -- Copy all text to system clipboard
-vim.api.nvim_set_keymap('n', '<Leader>Y', ':%y+<CR>', { noremap = true })
+map {'n', '<Leader>Y', ':%y+<CR>'}
 -- Copy text to system clipboard
-vim.api.nvim_set_keymap('n', '<Leader>y', '"+y', { noremap = true })
+map {'n', '<Leader>y', '"+y'}
 -- Paste from system clipboard
-vim.api.nvim_set_keymap('n', '<Leader>p', '"+p', { noremap = true })
+map {'n', '<Leader>p', '"+p'}
+
+-- Open git status
+map {'n', '<Leader>gs', ':Git status<CR>'}
+-- Git Add evetything
+map {'n', '<Leader>ga', ':Git add .<CR>'}
+-- Git commit message
+map {'n', '<Leader>gc', ':Git commit <CR>'}
+-- Git log
+map {'n', '<Leader>gl', ':Git log <CR>'}
 
 -- Moving through tabs
-vim.api.nvim_set_keymap('n', '<S-H>', 'gT', { noremap = true })
-vim.api.nvim_set_keymap('n', '<S-L>', 'gt', { noremap = true })
+map {'n', '<S-H>', 'gT'}
+map {'n', '<S-L>', 'gt'}
 
 -- Faster scrolling
-vim.api.nvim_set_keymap('n', '<C-E>', '2<C-E>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-Y>', '2<C-Y>', { noremap = true })
+map {'n', '<C-E>', '2<C-E>'}
+map {'n', '<C-Y>', '2<C-Y>'}
 
 -- Toggle spell check
-vim.api.nvim_set_keymap('n', '<Leader>ts', ':set spell!', { noremap = true, silent = true })
+map {'n', '<Leader>ts', ':set spell!', { silent = true }}
 
 -- Move between splits
-vim.api.nvim_set_keymap('n', '<C-J>', '<C-W><C-J>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-K>', '<C-W><C-K>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-L>', '<C-W><C-L>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-H>', '<C-W><C-H>', { noremap = true })
+map {'n', '<C-J>', '<C-W><C-J>'}
+map {'n', '<C-K>', '<C-W><C-K>'}
+map {'n', '<C-L>', '<C-W><C-L>'}
+map {'n', '<C-H>', '<C-W><C-H>'}
 
 -- Open url in browser
-vim.api.nvim_set_keymap('n', 'gx', ':silent execute "!xdg-open " . shellescape("<cWORD>")<CR>', { noremap = true })
+map {'n', 'gx', ':silent execute "!xdg-open " . shellescape("<cWORD>")<CR>'}
 
 -- Close current buffer
-vim.api.nvim_set_keymap('n', '<Leader>q', ':bd<CR>', { noremap = true, silent = true })
+map {'n', '<Leader>q', ':bd<CR>', { silent = true }}
 
 -- Close current window
-vim.api.nvim_set_keymap('n', '<Leader>cw', '<C-W>c', { noremap = true, silent = true })
+map {'n', '<Leader>cw', '<C-W>c', { silent = true }}
 
 -- Faster way to write changes
-vim.api.nvim_set_keymap('n', '<Leader>w', ':update<CR>', { noremap = true })
+map {'n', '<Leader>w', ':update<CR>'}
 -- Faster way to quit
-vim.api.nvim_set_keymap('n', '\\q', ':quit<CR>', { noremap = true })
+map {'n', '\\q', ':quit<CR>'}
 
 -- Use tab to match pairs
-vim.api.nvim_set_keymap('n', '<Tab>', '%', { noremap = true })
-vim.api.nvim_set_keymap('v', '<Tab>', '%', { noremap = true })
+map {'n', '<Tab>', '%'}
+map {'v', '<Tab>', '%'}
 
 -- Faster way to get into command line mode
-vim.api.nvim_set_keymap('n', ';', ':', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>;', ';', { noremap = true })
+map {'n', ';', ':'}
+map {'n', '<Leader>;', ';'}
 
 -- Expected behavior when moving through wrapped lines
-vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true })
-vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true })
+map {'n', 'j', 'gj'}
+map {'n', 'k', 'gk'}
 
 -- Strip whitespace of file
-vim.api.nvim_set_keymap('n', '<Leader>ss', ':call StripWhitespace()<CR>', { noremap = true })
+map {'n', '<Leader>ss', ':%s/\\s\\+$//e<CR>'}
 -- cd to the current file's folder
-vim.api.nvim_set_keymap('n', '<Leader>cd', ':cd %:p:h<CR>', { noremap = true })
+map {'n', '<Leader>cd', ':cd %:p:h<CR>'}
 
 -- Move through command line history
-vim.api.nvim_set_keymap('c', '<C-N>', '<Down>', { noremap = true })
-vim.api.nvim_set_keymap('c', '<C-P>', '<Up>', { noremap = true })
+map {'c', '<C-N>', '<Down>'}
+map {'c', '<C-P>', '<Up>'}
 
 -- Quickly move current line
-vim.api.nvim_set_keymap('n', '[e', ':<c-u>execute "move -1-". v:count1<cr>', { noremap = true })
-vim.api.nvim_set_keymap('n', ']e', ':<c-u>execute "move +". v:count1<cr>', { noremap = true })
+map {'n', '[e', ':<c-u>execute "move -1-". v:count1<cr>'}
+map {'n', ']e', ':<c-u>execute "move +". v:count1<cr>'}
 
 -- Tasks
-vim.api.nvim_set_keymap('n', '<F4>', ':MarkdownPreview<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<F5>', ':AsyncTask liveserver<CR>', { noremap = true, silent = true })
+map {'n', '<F4>', ':MarkdownPreview<CR>', { silent = true }}
+map {'n', '<F5>', ':AsyncTask liveserver<CR>', { silent = true }}
 
 -- LSP mappings
-vim.api.nvim_set_keymap('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', 'gD', '<cmd>lua vim.lsp.buf.implementation()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', 'K', ':Lspsaga hover_doc<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>rn', ':Lspsaga rename<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>ca', ':Lspsaga code_action<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>cc', ':Lspsaga show_line_diagnostics<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>[d', ':Lspsaga diagnostic_jump_next<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>]d', ':Lspsaga diagnostic_jump_prev<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>pd', ':Lspsaga preview_definition<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-F>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-B>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(-1)<CR>', { noremap = true, silent = true })
+map {'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { silent = true }}
+map {'n', 'gD', '<cmd>lua vim.lsp.buf.implementation()<CR>', { silent = true }}
+map {'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { silent = true }}
+map {'n', 'K', ':Lspsaga hover_doc<CR>', { silent = true }}
+map {'n', '<Leader>rn', ':Lspsaga rename<CR>', { silent = true }}
+map {'n', '<Leader>ca', ':Lspsaga code_action<CR>', { silent = true }}
+map {'n', '<Leader>cc', ':Lspsaga show_line_diagnostics<CR>', { silent = true }}
+map {'n', '<Leader>[d', ':Lspsaga diagnostic_jump_next<CR>', { silent = true }}
+map {'n', '<Leader>]d', ':Lspsaga diagnostic_jump_prev<CR>', { silent = true }}
+map {'n', '<C-F>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>', { silent = true }}
+map {'n', '<C-B>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(-1)<CR>', { silent = true }}
 
 -- Quickfix mappings
-vim.api.nvim_set_keymap('n', '[q', ':cprevious<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', ']q', ':cnext<CR>', { noremap = true, silent = true })
+map {'n', '[q', ':cprevious<CR>', { silent = true }}
+map {'n', ']q', ':cnext<CR>', { silent = true }}
 
 -- Telescope mappings
-vim.api.nvim_set_keymap('n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>ff', '<cmd>lua require("telescope.builtin").treesitter()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>', { noremap = true })
+map {'n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>'}
+map {'n', '<Leader>ff', '<cmd>lua require("telescope.builtin").treesitter()<CR>'}
+map {'n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>'}
+map {'n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>'}
+map {'n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>'}
 
 -- Open up nvim tree
-vim.api.nvim_set_keymap('n', '<C-N>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>rr', ':NvimTreeRefresh<CR>', { noremap = true, silent = true })
+map {'n', '<C-N>', ':NvimTreeToggle<CR>', { silent = true }}
+map {'n', '<Leader>rr', ':NvimTreeRefresh<CR>', { silent = true }}
 
 -- Plugin-specific settings
-vim.g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is for escape
-vim.g.sql_type_default = 'postgres' -- Change sql dialect to postgres
-vim.g.asyncrun_open = 6 -- Activate async task manager
-vim.g.asynctasks_extra_config = { '~/.config/nvim/.tasks' } -- Global tasks
-vim.g.vim_markdown_folding_disabled = 1
-vim.g.neoformat_only_msg_on_error = 1
-vim.g.nvim_tree_ignore = { '.git', 'node_modules', '.cache' }
-vim.g.nvim_tree_gitignore = 1 
-vim.g.nvim_tree_auto_open = 0
-vim.g.nvim_tree_auto_close = 1
-vim.g.nvim_tree_show_icons = { git = 0, folders = 1, files = 1, folder_arrows = 1 }
-vim.g.nord_borders = true
-vim.g.indent_blankline_char = "▏"
+g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is for escape
+g.sql_type_default = 'postgres' -- Change sql dialect to postgres
+g.asyncrun_open = 6 -- Activate async task manager
+g.asynctasks_extra_config = { '~/.config/nvim/.tasks' } -- Global tasks
+g.vim_markdown_folding_disabled = 1
+g.neoformat_only_msg_on_error = 1
+g.nvim_tree_ignore = { '.git', 'node_modules', '.cache' }
+g.nvim_tree_gitignore = 1
+g.nvim_tree_auto_open = 0
+g.nvim_tree_auto_close = 1
+g.nvim_tree_show_icons = { git = 0, folders = 1, files = 1, folder_arrows = 1 }
+g.nord_borders = true
+g.indent_blankline_char = "▏"
 
 -- User commands
-vim.api.nvim_exec([[
+exec([[
 " Commonly mistyped commands
 command! W w
 command! Q q
 " Delete all buffers except the current one
 command! Bonly %bd|e#
 " Format code
-command! Format execute 'lua vim.lsp.buf.formatting()' 
+command! Format execute 'lua vim.lsp.buf.formatting()'
 ]], false)
 
 -- Autocommands
-vim.api.nvim_exec([[
+exec([[
 augroup mygroup
 autocmd!
 " Filetype corrections
@@ -256,7 +278,7 @@ augroup end
 
 -- Plugin configuration
 require'nvim-treesitter.configs'.setup {
-    ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml", "tsx" }, 
+    ensure_installed = { "c", "cpp", "java", "python", "rust", "typescript", "javascript", "toml", "tsx" },
     link,
     highlight = {
         enable = true,
@@ -282,6 +304,26 @@ require'nvim-treesitter.configs'.setup {
             },
             swap_previous = {
                 ["<leader>A"] = "@parameter.inner",
+            },
+        },
+        move = {
+            enable = true,
+            set_jumps = true,
+            goto_next_start = {
+                ["]m"] = "@function.outer",
+                ["]]"] = "@class.outer",
+            },
+            goto_next_end = {
+                ["]M"] = "@function.outer",
+                ["]["] = "@class.outer",
+            },
+            goto_previous_start = {
+                ["[m"] = "@function.outer",
+                ["[["] = "@class.outer",
+            },
+            goto_previous_end = {
+                ["[M"] = "@function.outer",
+                ["[]"] = "@class.outer",
             },
         },
     },
@@ -313,8 +355,8 @@ local t = function(str)
 end
 
 local check_back_space = function()
-    local col = vim.fn.col('.') - 1
-    if col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') then
+    local col = fn.col('.') - 1
+    if col == 0 or fn.getline('.'):sub(col, col):match('%s') then
         return true
     else
         return false
@@ -322,30 +364,30 @@ local check_back_space = function()
 end
 
 _G.tab_complete = function()
-    if vim.fn.pumvisible() == 1 then
+    if fn.pumvisible() == 1 then
         return t "<C-n>"
-    elseif vim.fn.call("vsnip#available", {1}) == 1 then
+    elseif fn.call("vsnip#available", {1}) == 1 then
         return t "<Plug>(vsnip-expand-or-jump)"
     elseif check_back_space() then
         return t "<Tab>"
     else
-        return vim.fn['compe#complete']()
+        return fn['compe#complete']()
     end
 end
 _G.s_tab_complete = function()
-    if vim.fn.pumvisible() == 1 then
+    if fn.pumvisible() == 1 then
         return t "<C-p>"
-    elseif vim.fn.call("vsnip#jumpable", {-1}) == 1 then
+    elseif fn.call("vsnip#jumpable", {-1}) == 1 then
         return t "<Plug>(vsnip-jump-prev)"
     else
         return t "<S-Tab>"
     end
 end
 
-vim.api.nvim_set_keymap("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
-vim.api.nvim_set_keymap("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+map {"i", "<Tab>", "v:lua.tab_complete()", {expr = true}}
+map {"s", "<Tab>", "v:lua.tab_complete()", {expr = true}}
+map {"i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true}}
+map {"s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true}}
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -360,8 +402,11 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
 -- LSP servers
 require'lspconfig'.rust_analyzer.setup {
     capabilities = capabilities,
-    settings = {                      
+    settings = {
         ["rust-analyzer"] = {
+            checkOnSave = {
+		command = "clippy"
+	    },
             diagnostics = {
                 enable = true,
                 disabled = {"unresolved-proc-macro"},
@@ -372,9 +417,9 @@ require'lspconfig'.rust_analyzer.setup {
 }
 
 require'lspconfig'.tsserver.setup {
-    on_attach = function(client)
+    on_attach = function(client, bufnr)
         client.resolved_capabilities.document_formatting = false
-    end 
+    end
 }
 
 -- eslint and prettier
@@ -390,14 +435,13 @@ local prettier = {
 }
 
 local efm_log_dir = '/tmp/'
-local efm_root_markers = { 'package.json', '.git/' }
 local efm_config = os.getenv('HOME') .. '/.config/nvim/efm_config.yaml'
 local efm_languages = {
     yaml = { prettier },
     markdown = { prettier },
     javascript = { eslint, prettier },
     javascriptreact = { eslint, prettier },
-    typescript = { eslint, prettier },
+    typescript = { prettier, eslint },
     typescriptreact = { eslint, prettier },
     css = { prettier },
     scss = { prettier },
@@ -414,7 +458,7 @@ require'lspconfig'.efm.setup({
         "-logfile",
         efm_log_dir .. "efm.log"
     },
-    filetype = {
+    filetypes = {
         'javascript',
         'javascriptreact',
         'typescript',
@@ -427,10 +471,12 @@ require'lspconfig'.efm.setup({
         'graphql',
         'html'
     },
-    root_dir = require'lspconfig'.util.root_pattern(unpack(efm_root_markers)),
     settings = {
-        rootMarkers = efm_root_markers,
         languages = efm_languages
+    },
+    init_options = {
+        documentFormatting = true,
+        codeAction = true
     }
 })
 
@@ -460,14 +506,19 @@ require("lspkind").init()
 require('nvim-autopairs').setup()
 function _G.completions()
     local npairs = require("nvim-autopairs")
-    if vim.fn.pumvisible() == 1 then
-        if vim.fn.complete_info()["selected"] ~= -1 then
-            return vim.fn["compe#confirm"]("<CR>")
+    if fn.pumvisible() == 1 then
+        if fn.complete_info()["selected"] ~= -1 then
+            return fn["compe#confirm"]("<CR>")
         end
     end
     return npairs.check_break_line_char()
 end
-vim.api.nvim_set_keymap("i", "<CR>", "v:lua.completions()", {expr = true})
+
+require("nvim-autopairs.completion.compe").setup({
+    map_cr = true, --  map <CR> on insert mode
+    map_complete = true, -- it will auto insert `(` after select function or method item
+    auto_select = false,  -- auto select first item
+})
 
 require'nvim-web-devicons'.setup {
     default = true;

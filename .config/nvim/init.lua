@@ -29,13 +29,14 @@ require('packer').startup(function()
     use "onsails/lspkind-nvim"
     use "sbdchd/neoformat"
     use "kyazdani42/nvim-web-devicons"
-    use "terrortylor/nvim-comment"
+    use "b3nj5m1n/kommentary"
     use "rafamadriz/friendly-snippets"
     use "nvim-telescope/telescope-media-files.nvim"
     use "norcalli/nvim-colorizer.lua"
     use "windwp/nvim-ts-autotag"
     use "lukas-reineke/indent-blankline.nvim"
     use 'nvim-treesitter/nvim-treesitter-textobjects'
+    use 'JoosepAlviste/nvim-ts-context-commentstring'
     use {
         "folke/trouble.nvim",
         requires = "kyazdani42/nvim-web-devicons",
@@ -120,124 +121,129 @@ opt.shortmess:append({c = true})
 -- Leader key
 g.mapleader = ' '
 
-local map = function(key)
-    -- get the extra options
-    local opts = {noremap = true}
-    for i, v in pairs(key) do
-        if type(i) == 'string' then opts[i] = v end
-    end
-    vim.api.nvim_set_keymap(key[1], key[2], key[3], opts)
+local map = function(mode, lhs, rhs, opts)
+    local options = {noremap = true}
+    if opts then options = vim.tbl_extend('force', options, opts) end
+    vim.api.nvim_set_keymap(mode, lhs, rhs, options)
 end
 
+
 -- Alternate Esc bind
-map {"i", "<C-C>", "<Esc>", { silent = true }}
+map ("i", "<C-C>", "<Esc>", { silent = true })
 
 -- Edit vimrc
-map {'n', '<Leader>ev', ':new ~/.config/nvim/init.lua<CR>', { silent = true }}
+map ('n', '<Leader>ev', ':new ~/.config/nvim/init.lua<CR>', { silent = true })
 
 -- Copy all text to system clipboard
-map {'n', '<Leader>Y', ':%y+<CR>'}
+map ('n', '<Leader>Y', ':%y+<CR>')
 -- Copy text to system clipboard
-map {'n', '<Leader>y', '"+y'}
+map ('n', '<Leader>y', '"+y')
 -- Paste from system clipboard
-map {'n', '<Leader>p', '"+p'}
+map ('n', '<Leader>p', '"+p')
+-- Copy till end of line
+map ('n', 'Y', 'y$')
+
+-- Switch buffers with Left and Right keys
+map ('n', '<left>', ':bp<cr>')
+map ('n', '<right>', ':bn<cr>')
 
 -- Open git status
-map {'n', '<Leader>gs', ':Git status<CR>'}
+map ('n', '<Leader>gs', ':Git status<CR>')
 -- Git Add evetything
-map {'n', '<Leader>ga', ':Git add .<CR>'}
+map ('n', '<Leader>ga', ':Git add .<CR>')
 -- Git commit message
-map {'n', '<Leader>gc', ':Git commit <CR>'}
+map ('n', '<Leader>gc', ':Git commit <CR>')
 -- Git log
-map {'n', '<Leader>gl', ':Git log <CR>'}
+map ('n', '<Leader>gl', ':Git log <CR>')
 
 -- Moving through tabs
-map {'n', '<S-H>', 'gT'}
-map {'n', '<S-L>', 'gt'}
+map ('n', '<S-H>', 'gT')
+map ('n', '<S-L>', 'gt')
 
 -- Faster scrolling
-map {'n', '<C-E>', '2<C-E>'}
-map {'n', '<C-Y>', '2<C-Y>'}
+map ('n', '<C-E>', '2<C-E>')
+map ('n', '<C-Y>', '2<C-Y>')
 
 -- Toggle spell check
-map {'n', '<Leader>ts', ':set spell!', { silent = true }}
+map ('n', '<Leader>ts', ':set spell!', { silent = true })
 
 -- Move between splits
-map {'n', '<C-J>', '<C-W><C-J>'}
-map {'n', '<C-K>', '<C-W><C-K>'}
-map {'n', '<C-L>', '<C-W><C-L>'}
-map {'n', '<C-H>', '<C-W><C-H>'}
+map ('n', '<C-J>', '<C-W><C-J>')
+map ('n', '<C-K>', '<C-W><C-K>')
+map ('n', '<C-L>', '<C-W><C-L>')
+map ('n', '<C-H>', '<C-W><C-H>')
 
 -- Open url in browser
-map {'n', 'gx', ':silent execute "!xdg-open " . shellescape("<cWORD>")<CR>'}
+map ('n', 'gx', ':silent execute "!xdg-open " . shellescape("<cWORD>")<CR>')
 
 -- Close current buffer
-map {'n', '<Leader>q', ':bd<CR>', { silent = true }}
+map ('n', '<Leader>q', ':bd<CR>', { silent = true })
 
 -- Close current window
-map {'n', '<Leader>cw', '<C-W>c', { silent = true }}
+map ('n', '<Leader>cw', '<C-W>c', { silent = true })
 
 -- Faster way to write changes
-map {'n', '<Leader>w', ':update<CR>'}
+map ('n', '<Leader>w', ':update<CR>')
 -- Faster way to quit
-map {'n', '\\q', ':quit<CR>'}
+map ('n', '\\q', ':quit<CR>')
 
 -- Use tab to match pairs
-map {'n', '<Tab>', '%'}
-map {'v', '<Tab>', '%'}
+map ('n', '<Tab>', '%')
+map ('v', '<Tab>', '%')
 
 -- Faster way to get into command line mode
-map {'n', ';', ':'}
-map {'n', '<Leader>;', ';'}
+map ('n', ';', ':')
+map ('n', ':', ';')
 
 -- Expected behavior when moving through wrapped lines
-map {'n', 'j', 'gj'}
-map {'n', 'k', 'gk'}
+map ('n', 'j', 'gj')
+map ('n', 'k', 'gk')
 
 -- Strip whitespace of file
-map {'n', '<Leader>ss', ':%s/\\s\\+$//e<CR>'}
+map ('n', '<Leader>ss', ':%s/\\s\\+$//e<CR>')
 -- cd to the current file's folder
-map {'n', '<Leader>cd', ':cd %:p:h<CR>'}
+map ('n', '<Leader>cd', ':cd %:p:h<CR>')
 
 -- Move through command line history
-map {'c', '<C-N>', '<Down>'}
-map {'c', '<C-P>', '<Up>'}
+map ('c', '<C-N>', '<Down>')
+map ('c', '<C-P>', '<Up>')
 
 -- Quickly move current line
-map {'n', '[e', ':<c-u>execute "move -1-". v:count1<cr>'}
-map {'n', ']e', ':<c-u>execute "move +". v:count1<cr>'}
+map ('n', '[e', ':<c-u>execute "move -1-". v:count1<cr>')
+map ('n', ']e', ':<c-u>execute "move +". v:count1<cr>')
 
 -- Tasks
-map {'n', '<F4>', ':MarkdownPreview<CR>', { silent = true }}
-map {'n', '<F5>', ':AsyncTask liveserver<CR>', { silent = true }}
+map ('n', '<F4>', ':MarkdownPreview<CR>', { silent = true })
+map ('n', '<F5>', ':AsyncTask liveserver<CR>', { silent = true })
 
 -- LSP mappings
-map {'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { silent = true }}
-map {'n', 'gD', '<cmd>lua vim.lsp.buf.implementation()<CR>', { silent = true }}
-map {'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { silent = true }}
-map {'n', 'K', ':Lspsaga hover_doc<CR>', { silent = true }}
-map {'n', '<Leader>rn', ':Lspsaga rename<CR>', { silent = true }}
-map {'n', '<Leader>ca', ':Lspsaga code_action<CR>', { silent = true }}
-map {'n', '<Leader>cc', ':Lspsaga show_line_diagnostics<CR>', { silent = true }}
-map {'n', '<Leader>[d', ':Lspsaga diagnostic_jump_next<CR>', { silent = true }}
-map {'n', '<Leader>]d', ':Lspsaga diagnostic_jump_prev<CR>', { silent = true }}
-map {'n', '<C-F>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>', { silent = true }}
-map {'n', '<C-B>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(-1)<CR>', { silent = true }}
+map ('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', { silent = true })
+map ('n', 'gD', '<cmd>lua vim.lsp.buf.implementation()<CR>', { silent = true })
+map ('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', { silent = true })
+map ('n', 'K', ':Lspsaga hover_doc<CR>', { silent = true })
+map ('n', '<Leader>rn', ':Lspsaga rename<CR>', { silent = true })
+map ('n', '<Leader>ca', ':Lspsaga code_action<CR>', { silent = true })
+map ('n', '<Leader>cc', ':Lspsaga show_line_diagnostics<CR>', { silent = true })
+map ('n', '<Leader>[d', ':Lspsaga diagnostic_jump_next<CR>', { silent = true })
+map ('n', '<Leader>]d', ':Lspsaga diagnostic_jump_prev<CR>', { silent = true })
+map ('n', '<C-F>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(1)<CR>', { silent = true })
+map ('n', '<C-B>', '<cmd>lua require("lspsaga.action").smart_scroll_with_saga(-1)<CR>', { silent = true })
 
 -- Quickfix mappings
-map {'n', '[q', ':cprevious<CR>', { silent = true }}
-map {'n', ']q', ':cnext<CR>', { silent = true }}
+map ('n', '[q', ':cprevious<CR>', { silent = true })
+map ('n', ']q', ':cnext<CR>', { silent = true })
+map ('n', 'cq', ':cclose<CR>', { silent = true })
 
 -- Telescope mappings
-map {'n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>'}
-map {'n', '<Leader>ff', '<cmd>lua require("telescope.builtin").treesitter()<CR>'}
-map {'n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>'}
-map {'n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>'}
-map {'n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>'}
+map ('n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>')
+map ('n', '<Leader>ff', '<cmd>lua require("telescope.builtin").treesitter()<CR>')
+map ('n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>')
+map ('n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>')
+map ('n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>')
 
 -- Open up nvim tree
-map {'n', '<C-N>', ':NvimTreeToggle<CR>', { silent = true }}
-map {'n', '<Leader>rr', ':NvimTreeRefresh<CR>', { silent = true }}
+map ('n', '<C-N>', ':NvimTreeToggle<CR>', { silent = true })
+map ('n', '<Leader>rr', ':NvimTreeRefresh<CR>', { silent = true })
 
 -- Plugin-specific settings
 g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is for escape
@@ -253,6 +259,8 @@ g.nvim_tree_auto_close = 1
 g.nvim_tree_show_icons = { git = 0, folders = 1, files = 1, folder_arrows = 1 }
 g.nord_borders = true
 g.indent_blankline_char = "▏"
+g.indent_blankline_filetype_exclude = { "help", "terminal", "dashboard", "packer" }
+g.indent_blankline_buftype_exclude = { "terminal" }
 
 -- User commands
 exec([[
@@ -283,6 +291,12 @@ require'nvim-treesitter.configs'.setup {
     highlight = {
         enable = true,
     },
+    indent = {
+        enable = true
+    },
+    context_commentstring = {
+        enable = true,
+    }
 }
 
 require'nvim-treesitter.configs'.setup {
@@ -384,10 +398,10 @@ _G.s_tab_complete = function()
     end
 end
 
-map {"i", "<Tab>", "v:lua.tab_complete()", {expr = true}}
-map {"s", "<Tab>", "v:lua.tab_complete()", {expr = true}}
-map {"i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true}}
-map {"s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true}}
+map ("i", "<Tab>", "v:lua.tab_complete()", {expr = true})
+map ("s", "<Tab>", "v:lua.tab_complete()", {expr = true})
+map ("i", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
+map ("s", "<S-Tab>", "v:lua.s_tab_complete()", {expr = true})
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -442,7 +456,7 @@ local efm_languages = {
     javascript = { eslint, prettier },
     javascriptreact = { eslint, prettier },
     typescript = { prettier, eslint },
-    typescriptreact = { eslint, prettier },
+    typescriptreact = { prettier, eslint},
     css = { prettier },
     scss = { prettier },
     json = { prettier },
@@ -523,9 +537,29 @@ require("nvim-autopairs.completion.compe").setup({
 require'nvim-web-devicons'.setup {
     default = true;
 }
-require('nvim_comment').setup()
 require('telescope').load_extension('media_files')
 require('colorizer').setup()
-require('gitsigns').setup()
+require('gitsigns').setup {
+      keymaps = {
+      -- Default keymap options
+      buffer = true,
+      noremap = true,
+      ["n ]c"] = { expr = true, "&diff ? ']c' : '<cmd>lua require\"gitsigns\".next_hunk()<CR>'" },
+      ["n [c"] = { expr = true, "&diff ? '[c' : '<cmd>lua require\"gitsigns\".prev_hunk()<CR>'" },
+      ["n <leader>hs"] = '<cmd>lua require"gitsigns".stage_hunk()<CR>',
+      ["n <leader>hu"] = '<cmd>lua require"gitsigns".undo_stage_hunk()<CR>',
+      ["n <leader>hr"] = '<cmd>lua require"gitsigns".reset_hunk()<CR>',
+      ["n <leader>hp"] = '<cmd>lua require"gitsigns".preview_hunk()<CR>',
+      ["n <leader>hb"] = '<cmd>lua require"gitsigns".blame_line()<CR>',
+   },
+   sign_priority = 5,
+   signs = {
+      add = { hl = "DiffAdd", text = "│", numhl = "GitSignsAddNr" },
+      change = { hl = "DiffChange", text = "│", numhl = "GitSignsChangeNr" },
+      changedelete = { hl = "DiffChange", text = "~", numhl = "GitSignsChangeNr" },
+      delete = { hl = "DiffDelete", text = "_", numhl = "GitSignsDeleteNr" },
+      topdelete = { hl = "DiffDelete", text = "‾", numhl = "GitSignsDeleteNr" },
+   },
+}
 require('nvim-ts-autotag').setup()
 require('nord').set()

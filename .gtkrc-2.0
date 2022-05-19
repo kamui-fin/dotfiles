@@ -4,7 +4,7 @@
 include "/home/kamui/.gtkrc-2.0.mine"
 gtk-theme-name="Adapta-FrostBlue3Nokto-Eta"
 gtk-icon-theme-name="Tela-dark"
-gtk-font-name="Noto Sans CJK TC Light 11"
+gtk-font-name="Source Sans Pro 12"
 gtk-cursor-theme-name="Breeze_Snow"
 gtk-cursor-theme-size=0
 gtk-toolbar-style=GTK_TOOLBAR_BOTH
@@ -15,5 +15,5 @@ gtk-enable-event-sounds=1
 gtk-enable-input-feedback-sounds=1
 gtk-xft-antialias=1
 gtk-xft-hinting=1
-gtk-xft-hintstyle="hintfull"
+gtk-xft-hintstyle="hintmedium"
 gtk-xft-rgba="none"

@@ -11,5 +11,5 @@ export XMODIFIERS=@im=fcitx
 export QT_IM_MODULE=fcitx
 export GTK_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
-# exec dbus-launch --exit-with-session bspwm
-exec bspwm
+exec dbus-launch --exit-with-session bspwm
+# exec bspwm

@@ -11,6 +11,8 @@ if fn.empty(fn.glob(install_path)) > 0 then
     vim.api.nvim_command('packadd packer.nvim')
 end
 
+vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+
 require('packer').startup(function()
     use 'wbthomason/packer.nvim'
     use 'windwp/nvim-autopairs'
@@ -25,7 +27,7 @@ require('packer').startup(function()
     use 'mechatroner/rainbow_csv'
     use 'neovim/nvim-lspconfig'
     use 'hrsh7th/nvim-compe'
-    use 'glepnir/lspsaga.nvim'
+    use 'tami5/lspsaga.nvim'
     use "onsails/lspkind-nvim"
     use "sbdchd/neoformat"
     use "kyazdani42/nvim-web-devicons"
@@ -37,16 +39,14 @@ require('packer').startup(function()
     use "lukas-reineke/indent-blankline.nvim"
     use 'nvim-treesitter/nvim-treesitter-textobjects'
     use 'JoosepAlviste/nvim-ts-context-commentstring'
-    use 'luukvbaal/nnn.nvim'
     use 'mzlogin/vim-markdown-toc'
     use 'ferrine/md-img-paste.vim'
-    use {
-        "folke/trouble.nvim",
-        requires = "kyazdani42/nvim-web-devicons",
-        config = function()
-            require("trouble").setup {
-            }
-        end
+    use 'mfussenegger/nvim-dap'
+    use 'theHamsta/nvim-dap-virtual-text'
+    use 'mfussenegger/nvim-dap-python'
+    use { 
+        "rcarriga/nvim-dap-ui", 
+        requires = {"mfussenegger/nvim-dap"} 
     }
     use {
         'nvim-treesitter/nvim-treesitter',
@@ -73,6 +73,19 @@ require('packer').startup(function()
     use {
         'nvim-lualine/lualine.nvim',
         requires = {'kyazdani42/nvim-web-devicons', opt = true}
+    }
+    use {
+        "folke/trouble.nvim",
+        requires = "kyazdani42/nvim-web-devicons"
+    }
+    use {
+      "nvim-neo-tree/neo-tree.nvim",
+        branch = "v2.x",
+        requires = { 
+            "nvim-lua/plenary.nvim",
+            "kyazdani42/nvim-web-devicons", -- not strictly required, but recommended
+            "MunifTanjim/nui.nvim",
+        }
     }
 end)
 
@@ -148,6 +161,8 @@ map ('n', '<Leader>ga', ':Git add .<CR>')
 map ('n', '<Leader>gc', ':Git commit <CR>')
 -- Git log
 map ('n', '<Leader>gl', ':Git log <CR>')
+-- Git push
+map ('n', '<Leader>gp', ':Git push <CR>')
 
 -- Moving through tabs
 map ('n', '<S-H>', 'gT')
@@ -168,6 +183,8 @@ map ('n', '<C-H>', '<C-W><C-H>')
 
 -- Open url in browser
 map ('n', 'gx', ':silent execute "!xdg-open " . shellescape("<cWORD>")<CR>')
+-- Open current file path
+map ('n', 'cf', ':e <cfile><cr>', { silent = true })
 
 -- Close current buffer
 map ('n', '<Leader>q', ':bd<CR>', { silent = true })
@@ -230,14 +247,15 @@ map ('n', 'cq', ':cclose<CR>', { silent = true })
 
 -- Telescope mappings
 map ('n', '<C-P>', '<cmd>lua require("telescope.builtin").find_files()<CR>')
-map ('n', '<Leader>ff', '<cmd>lua require("telescope.builtin").treesitter()<CR>')
+map ('n', '<Leader>ft', '<cmd>lua require("telescope.builtin").treesitter()<CR>')
 map ('n', '<Leader>fb', '<cmd>lua require("telescope.builtin").buffers()<CR>')
 map ('n', '<Leader>fg', '<cmd>lua require("telescope.builtin").live_grep()<CR>')
+map ('n', '<Leader>ff', '<cmd>lua require("telescope.builtin").git_branches()<CR>')
+map ('n', '<Leader>fr', '<cmd>lua require("telescope.builtin").resume()<CR>')
 map ('n', '<Leader>fh', '<cmd>lua require("telescope.builtin").help_tags()<CR>')
 
--- NNN mappings
-map ('n', '<C-N>', ':NnnExplorer<CR>', { silent = true })
-map ('n', '<Leader>rr', ':NnnPicker<CR>', { silent = true })
+-- Nvim tree
+map ('n', '<C-N>', ':Neotree toggle<CR>', { silent = true })
 
 -- Trouble
 map("n", "<leader>xx", "<cmd>TroubleToggle<cr>", {silent = true, noremap = true})
@@ -249,6 +267,25 @@ map("n", "gR", "<cmd>Trouble lsp_references<cr>", {silent = true, noremap = true
 
 -- Custom text object: "around document". Useful to format/indent an entire file with gqad or =ad
 map('o', 'ad', '<Cmd>normal! ggVG<CR>', {noremap = true})
+
+-- Debugging
+map("n", "<F4>", ":lua require('dapui').toggle()<CR>")
+map("n", "<F5>", ":lua require('dap').toggle_breakpoint()<CR>")
+map("n", "<F9>", ":lua require('dap').continue()<CR>")
+map("n", "<F1>", ":lua require('dap').step_over()<CR>")
+map("n", "<F2>", ":lua require('dap').step_into()<CR>")
+map("n", "<F3>", ":lua require('dap').step_out()<CR>")
+map("n", "<Leader>duh", ":lua require('dap.ui.widgets').hover()<CR>")
+map("n", "<Leader>duf", ":lua local widgets=require('dap.ui.widgets');widgets.centered_float(widgets.scopes)<CR>")
+map("n", "<Leader>dro", ":lua require('dap').repl.open()<CR>")
+map("n", "<Leader>drl", ":lua require('dap').repl.run_last()<CR>")
+map("n", "<Leader>dbc", ":lua require('dap').set_breakpoint(vim.fn.input('Breakpoint condition: '))<CR>")
+map("n", "<Leader>dbm", ":lua require('dap').set_breakpoint({ nil, nil, vim.fn.input('Log point message: ') })<CR>")
+map("n", "<Leader>dc", ":lua require('dap.ui.variables').scopes()<CR>")
+map('n', '<leader>dt', ':lua require"dap".terminate()<CR>')
+map('n', '<leader>dR', ':lua require"dap".clear_breakpoints()<CR>')
+map("n", "<Leader>dp", ":lua require('dap-python').test_method()<CR>")
+map("n", "<Leader>ds", ":lua require('dap-python').debug_selection()<CR>")
 
 -- Plugin-specific settings
 g.ftplugin_sql_omni_key = '<C-K>' -- Remap to different key since Ctrl-C is for escape
@@ -541,7 +578,7 @@ function _G.completions()
     return npairs.check_break_line_char()
 end
 
-require'lspconfig'.pylsp.setup{}
+-- require'lspconfig'.pylsp.setup{}
 require'lspconfig'.clangd.setup{}
 
 -- LSP Misc
@@ -573,7 +610,6 @@ require('telescope').setup{
    defaults = {
       vimgrep_arguments = {
          "rg",
-         "--color=never",
          "--no-heading",
          "--with-filename",
          "--line-number",
@@ -608,13 +644,10 @@ require('telescope').setup{
       border = {},
       borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
       color_devicons = true,
-      use_less = true,
       set_env = { ["COLORTERM"] = "truecolor" }, -- default = nil,
       file_previewer = require("telescope.previewers").vim_buffer_cat.new,
       grep_previewer = require("telescope.previewers").vim_buffer_vimgrep.new,
       qflist_previewer = require("telescope.previewers").vim_buffer_qflist.new,
-      -- Developer configurations: Not meant for general override
-      buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
    },
    extensions = {
       media_files = {
@@ -627,14 +660,6 @@ require("telescope").load_extension("media_files")
 require('colorizer').setup()
 require('nvim-ts-autotag').setup()
 require('onenord').setup()
-require("nnn").setup{
-    auto_close = true,
-    replace_netrw = "picker",
-    windownav = {        -- window movement mappings to navigate out of nnn
-        left = "<C-h>",
-        right = "<C-l>"
-    },
-}
 require'lspconfig'.emmet_ls.setup{}
 require('gitsigns').setup {
     signs = {
@@ -711,3 +736,59 @@ require('lualine').setup {
 }
 
 -- require "lsp_signature".setup()
+require'lspconfig'.java_language_server.setup {
+    cmd = {
+        "/home/kamui/programs/java-language-server/dist/lang_server_linux.sh"
+    }
+}
+
+require("trouble").setup {}
+
+-- Node debugging
+local dap = require('dap')
+dap.adapters.node2 = {
+    type = 'executable',
+    command = 'node',
+    args = {os.getenv('HOME') .. '/programs/vscode-node-debug2/out/src/nodeDebug.js'},
+}
+dap.configurations.javascript = {
+    {
+        name = 'Launch',
+        type = 'node2',
+        request = 'launch',
+        program = '${file}',
+        cwd = vim.fn.getcwd(),
+        sourceMaps = true,
+        protocol = 'inspector',
+        console = 'integratedTerminal',
+    },
+    {
+        -- For this to work you need to make sure the node process is started with the `--inspect` flag.
+        name = 'Attach to process',
+        type = 'node2',
+        request = 'attach',
+        processId = require'dap.utils'.pick_process,
+    },
+}
+
+-- Python debugging
+require('dap-python').setup('~/.virtualenvs/debugpy/bin/python')
+require('dap-python').test_runner = 'pytest'
+
+require("dapui").setup()
+require("nvim-dap-virtual-text").setup()
+
+require("neo-tree").setup({
+    enable_git_status = true,
+    enable_diagnostics = false,
+    filesystem = {
+        commands = {
+            -- Override delete to use trash instead of rm
+            delete = function(state)
+                local path = state.tree:get_node().path
+                vim.fn.system({ "trash", vim.fn.fnameescape(path) })
+                require("neo-tree.sources.manager").refresh(state.name)
+            end,
+        },
+    },
+})
